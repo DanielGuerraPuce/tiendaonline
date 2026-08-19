@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block titulo %}Catálogo — Tienda Online{% endblock %}
+
+{% block content %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="mb-1">Catálogo de productos</h1>
+            <p class="text-muted mb-0">Encuentra productos para cada necesidad.</p>
+        </div>
+        {% if productos %}
+        <span class="badge text-bg-primary">{{ productos|length }} disponibles</span>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        {% for producto in productos %}
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                {% if producto.imagen %}
+                <img src="{{ url_for('static', filename='uploads/' ~ producto.imagen) }}"
+                     class="card-img-top" alt="{{ producto.nombre }}" style="height: 220px; object-fit: cover;">
+                {% else %}
+                <div class="product-placeholder text-secondary d-flex align-items-center justify-content-center"
+                     role="img" aria-label="Producto sin imagen">
+                    <span class="fs-1">🛍️</span>
+                </div>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <span class="badge text-bg-secondary align-self-start mb-2">{{ producto.tipo|capitalize }}</span>
+                    <h2 class="h5 card-title">{{ producto.nombre }}</h2>
+                    <p class="card-text text-muted mb-1">Código: {{ producto.codigo }}</p>
+                    <p class="card-text mb-2">Stock: {{ producto.stock }}</p>
+                    <p class="card-text fs-4 fw-bold mt-auto mb-3">
+                        ${{ "%.2f"|format(producto.precio_final()) }}
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url_for('detalle_producto', producto_id=producto.id) }}"
+                           class="btn btn-outline-primary">
+                            Ver detalle
+                        </a>
+                        {% if session.get('usuario_rol') == 'cliente' %}
+                        <form action="{{ url_for('agregar_carrito', producto_id=producto.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary">🛍️</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">No hay productos disponibles todavía.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
